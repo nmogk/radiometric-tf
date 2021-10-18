@@ -1,0 +1,19 @@
+{
+    "name":"Primordial Signature",
+    "reference" : "Snelling, AA (2014). \"Radioisotope dating of meteorites: I. The Allende CV3 carbonaceous chondrite.\" Answers Research Journal 7:103–145.",
+    "description" : "This model has a single uniform acceleration period during the Flood. Dates older than the Flood initiation date represent a \"primordial creation\" signature, and are not temporally significant.",
+    "family" : "One pulse",
+    "model_class" : "Flood-only",
+    "termination" : "End-Flood",
+    "laws" : 3,
+    "isotope_system" : "generic",
+    "max_ybp" : 6000.0,
+    "flood_start_ybp" : 4301.0,
+    "flood_end_ybp" : 4299.98357,
+    "max_measured_age" : 4000000000.0,
+    "scale_factor" : 1,
+    "tiepoints" : [4299.98357, 4301.0],
+    "model" : ["lambda t: t", "lambda t: 571451161.931931 * t", "lambda t: 1 * t"],
+    "inverse" : ["lambda t: t", "lambda t: t/571451161.931931", "lambda t: t"],
+    "derivative" : ["lambda t: [1 for x in t]", "lambda t: [571451161.931931 for x in t]", "lambda t: [1 for x in t]"]
+}

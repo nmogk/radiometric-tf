@@ -1,0 +1,19 @@
+{
+    "name":"Big Flood, 1/2 year",
+    "reference" : "n/a",
+    "description" : "This model has a single uniform acceleration period which occurs only during the Flood and continues until midway through the Flood, accounting for all radiometric decay in this timeframe.",
+    "family" : "One pulse",
+    "model_class" : "Flood-only",
+    "termination" : "Mid-Flood",
+    "laws" : 2,
+    "isotope_system" : "generic",
+    "max_ybp" : 6000.0,
+    "flood_start_ybp" : 4301.0,
+    "flood_end_ybp" : 4299.98357,
+    "max_measured_age" : 4000000000.0,
+    "scale_factor" : 1,
+    "tiepoints" : [4300.5, 4301.0],
+    "model" : ["lambda t: t", "lambda t: 8004790875.42468 * t", "lambda t: t"],
+    "inverse" : ["lambda t: t", "lambda t: t/8004790875.42468", "lambda t: t"],
+    "derivative" : ["lambda t: [1 for x in t]", "lambda t: [8004790875.42468 for x in t]", "lambda t: [1 for x in t]"]
+}

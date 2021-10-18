@@ -1,0 +1,19 @@
+{
+    "name":"Humphreys'",
+    "reference" : "Humphreys, D. Russell. (2014) \"Magnetized moon rocks shed light on Precambrian mystery\". Journal of Creation 28(3).",
+    "description" : "There would be 1656 years of relatively moderate decay acceleration (factor of about 2.4 million times today's rates), producing about 4 billion years' worth of decay in Precambrian granite forming slowly deep beneath the pre-Flood oceans, to become the post-Flood continental crust we are living on today.  No radioactivity to speak of in the pre-Flood biosphere.  The decay acceleration factor would increase to about 500 million during the year of the Flood. (Pers. Comm.)\n\nThis implementation has been scaled from Russ' initial proposal to match 4Ga radiometric age of creation and 571Ma radiometric start of Flood.",
+    "family" : "Humphreys",
+    "model_class" : "Flood-anticipatory",
+    "termination" : "End-Flood",
+    "laws" : 3,
+    "isotope_system" : "generic",
+    "max_ybp" : 6000.0,
+    "flood_start_ybp" : 4301.0,
+    "flood_end_ybp" : 4299.98357,
+    "max_measured_age" : 4000000000.0,
+    "scale_factor" : 1,
+    "tiepoints" : [4299.98357, 4301.0],
+    "model" : ["lambda t: t", "lambda t: 571853855.567 * t", "lambda t: 2018013.16807 * t"],
+    "inverse" : ["lambda t: t", "lambda t: t/571853855.567", "lambda t: t/2018013.16807"],
+    "derivative" : ["lambda t: [1 for x in t]", "lambda t: [571853855.567 for x in t]", "lambda t: [2018013.16807 for x in t]"]
+}

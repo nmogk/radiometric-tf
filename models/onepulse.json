@@ -1,0 +1,19 @@
+{
+    "name":"Single pulse, 1/2 year",
+    "reference" : "n/a",
+    "description" : "This model has a single uniform acceleration period which predates the Flood and continues until midway through the Floodm accounting for all radiometric decay in this timeframe.",
+    "family" : "One pulse",
+    "model_class" : "Flood-anticipatory",
+    "termination" : "Mid-Flood",
+    "laws" : 2,
+    "isotope_system" : "generic",
+    "max_ybp" : 6000.0,
+    "flood_start_ybp" : 4301.0,
+    "flood_end_ybp" : 4299.98357,
+    "max_measured_age" : 4000000000.0,
+    "scale_factor" : 1,
+    "tiepoints" : [4300.5, 4304.0],
+    "model" : ["lambda t: t", "lambda t: 1142953397.01 * t", "lambda t: t"],
+    "inverse" : ["lambda t: t", "lambda t: t/1142953397.01", "lambda t: t"],
+    "derivative" : ["lambda t: [1 for x in t]", "lambda t: [1142953397.01 for x in t]", "lambda t: [1 for x in t]"]
+}

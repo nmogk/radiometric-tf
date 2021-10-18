@@ -1,0 +1,18 @@
+{
+    "name":"RATE two-pulse with 300yr linear ramp",
+    "reference" : "Snelling, AA (2005). \"Radiohalos in granites: evidence for accelerated nuclear decay,\" in Radioisotopes and the Age of the Earth: Results of a Young-Earth Creationist Research Initiative. L Vardiman, AA Snelling, and EF Chaffin eds. Institute for Creation Research, El Cajon, California, and the Creation Research Society, Chino Valley, Arizona, pp. 101-208.",
+    "description" : "A single large pulse of decay during Creation with a second large pulse during the Flood with a smaller ramping pulse during the Ice Age.\n\nThis implementation has been scaled from the initial proposal to match 4Ga radiometric age of creation and 571Ma radiometric start of Flood.",
+    "family" : "Two-pulse",
+    "model_class" : "Other",
+    "termination" : "Post-Flood",
+    "laws" : 4,
+    "isotope_system" : "generic",
+    "max_ybp" : 6000.0,
+    "flood_start_ybp" : 4301.0,
+    "flood_end_ybp" : 4299.98357,
+    "max_measured_age" : 4000000000.0,
+    "scale_factor" : 1,
+    "tiepoints" : [4000, 4299.98357, 4301.0, 5999.99178],
+    "model" : ["lambda t: t", "lambda t: t + 723.923348190037 * t**2", "lambda t: 506746343.733026 * t", "lambda t: t", "lambda t: 428562622128.502 * t"],
+    "derivative" : ["lambda t: [1 for x in t]", "lambda t: 1 + 2 * 723.923348190037 * t", "lambda t: [506746343.733026 for x in t]", "lambda t: [1 for x in t]", "lambda t: [428562622128.502 for x in t]"]
+}
