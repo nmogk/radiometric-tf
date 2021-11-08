@@ -99,10 +99,10 @@ class RadiometricTransferFunction:
             day = 1/365.2425
             if  self.max_ybp - self.ybp <= 7 * day:
                 return 'Creation Day {}'.format(int(1+(self.max_ybp - self.ybp)/day))
-            elif self.ybp <= self.flood_start_ybp and self.ybp >= self.flood_end_ybp:
+            else: # elif self.ybp <= self.flood_start_ybp and self.ybp >= self.flood_end_ybp:
                 return 'Flood day {}'.format(int(1+(self.flood_start_ybp - self.ybp)/day))
-            else:
-                return ''
+            #else:
+            #    return ''
 
     class UCHelper:
         """
@@ -802,12 +802,13 @@ def __commmand_line_interface__():
     parser.add_argument('-i', '--info', default=False, action='store_true', help="Print a table with standard model evaluation information")
     parser.add_argument('-c', '--cal2rad', nargs='*', metavar='DATE_YBP', help='Perform a conversion of the given dates to radiometric ages')
     parser.add_argument('-r','--rad2cal', nargs='*', metavar='RADM_AGE', help='Perform a conversion of the given radiometric ages to dates')
+    parser.add_argument('-s','--rad2special', nargs='*', metavar='RADM_AGE', help='Perform a conversion of the given radiometric ages to dates')
     parser.add_argument('-x','--accel', nargs='*', metavar='DATE_YBP', help='Get the acceleration factor for the given dates')
     parser.add_argument('-p', '--plot', default=False, action='store_true', help="Generate standard plots of the transfer function and acceleration factor")
     parser.add_argument('-f', '--format', choices=['am', 'bc', 'ybp'], default='ybp', help='Selects the calendar system used for displaying years. Default YBP (2000)')
     parser.add_argument('-w', default=True, action='store_false', help="Supress untrusted source warning.")
     # parser.add_argument('--verbose', default=False, action='store_true') # As of now, I have nothing to be wordy about
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.1.0')
 
     args = parser.parse_args()
     
@@ -827,6 +828,9 @@ You can supress this message and continue by invoking with the -w option', width
 
     if args.rad2cal is not None:
         print(cli_rtf.invert(np.array(args.rad2cal, dtype=float)).__getattribute__(args.format))
+
+    if args.rad2special is not None:
+        print(cli_rtf.invert(np.array(args.rad2special, dtype=float)).get_special())
 
     if args.accel is not None:
         # Xi needs adjacent points to calculate the forward distance
