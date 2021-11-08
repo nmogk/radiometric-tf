@@ -771,6 +771,11 @@ def init_from_file(filename):
         
     model = RadiometricTransferFunction(**indata) # Pass all of the JSON attributes to the constructor
 
+    if 'imports' in indata and isinstance(indata['imports'], list):
+        import importlib
+        for module in indata['imports']:
+            globals()[module] = importlib.import_module(module)
+
     if 'inverse' in indata and isinstance(indata['inverse'], list):
         eval_inverse = [eval(func) for func in indata['inverse']]
     else:
