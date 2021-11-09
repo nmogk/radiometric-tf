@@ -674,7 +674,7 @@ class RadiometricTransferFunction:
 
         #--------------------------------------------------------------------------------------------------
 
-        t = np.concatenate((np.linspace(self.flood_start_ybp-301, self.flood_start_ybp, 10000, endpoint=False), np.linspace(self.flood_start_ybp, self.max_ybp, 1000)))
+        t = np.concatenate((np.linspace(self.flood_start_ybp-301, self.flood_start_ybp, 10000, endpoint=False), np.linspace(self.flood_start_ybp, self.max_ybp, 60000)))
         t, x = self.Xi(t)
         y = self.H(t)
         t = [self.DateHelper(self, t).__getattribute__(style) for t in t]
