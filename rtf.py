@@ -339,7 +339,7 @@ class RadiometricTransferFunction:
         self.max_measured_age = self.max_ybp
         self.scale_factor = 1.
         self.tiepoints = [0, self.max_ybp]
-        self.H = lambda: (_ for _ in ()).throw(Exception('H: set_rtf must be called before attempting to use a convertion'))
+        self.H = lambda: (_ for _ in ()).throw(Exception('H: set_rtf must be called before attempting to use a conversion'))
         self.__invert__ = self.__binary_search_invert__
         self.__xi__ = self.__forward_difference_xi__
 
