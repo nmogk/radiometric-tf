@@ -317,6 +317,8 @@ class RadiometricTransferFunction:
 
             **flood_start_ybp: calendar year with fraction of the start of the Flood
 
+            **erodeozoic_start_ybp: calendar year with the point when the Flood waters begin to recede
+
             **flood_end_ybp: calendar year with fraction of the end of the Flood
 
             **max_measured_age: maximum radiometric age in the range of the model
@@ -336,6 +338,7 @@ class RadiometricTransferFunction:
         self.max_ybp = 6000.
         self.flood_start_ybp = 4301.
         self.flood_end_ybp = self.flood_start_ybp - 1
+        self.erodeozoic_start_ybp = self.flood_end_ybp+(self.flood_start_ybp - self.flood_end_ybp)/2.
         self.max_measured_age = self.max_ybp
         self.scale_factor = 1.
         self.tiepoints = [0, self.max_ybp]
@@ -518,7 +521,7 @@ class RadiometricTransferFunction:
 
     def erodeozoic_radiometric_range(self):
         """Get the lower and upper bound radiometric dates for the erosive later half of the Flood event."""
-        return self.H(self.flood_end_ybp+(self.flood_start_ybp - self.flood_end_ybp)/2.)[0], self.H(self.flood_end_ybp)[0]
+        return self.H(self.erodeozoic_start_ybp)[0], self.H(self.flood_end_ybp)[0]
 
     def invert(self, measured_date, meas_error=None, **kwargs):
         """
