@@ -31,10 +31,10 @@ class Reservoir(Sample):
         if time > self.sample_time: # If requested time is before the sampling event, then ask the parent first
             return self.parent.get_apparent_age(model, time)
 
-        initial_excess = self.initial_excess(model) # Saving the value, as this call traverses a tree with integrations
-        initial_relaxation = initial_excess * ( 1 - np.exp( self.relaxation * (time - model.invert(initial_excess).ybp) ))
+        initial_excess = model.H(self.sample_time) + self.initial_excess(model) # Saving the value, as this call traverses a tree with integrations
+        initial_relaxation = initial_excess * ( 1 - np.exp( self.relaxation * (time - self.sample_time) ))
         episodic_relaxation = -self.relaxation * np.exp(self.relaxation * time) * quad( lambda tau: np.exp( -self.relaxation * tau ) * model.H(tau), time, self.sample_time )[0]
-        return model.H(self.sample_time) + initial_excess - initial_relaxation - episodic_relaxation - model.H(time)
+        return initial_excess - initial_relaxation - episodic_relaxation - model.H(time)
 
 class PrimordialSource(Reservoir):
     def __init__(self, initial_apparent_age = 0, initial_time = 0):
