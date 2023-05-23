@@ -1,5 +1,131 @@
 import numpy as np
 
+class UCHelper:
+    """
+    UCHelper objects take radiometric dates and finds UC time period information.
+
+    The string representation is the numerical value of the object labeled in Ma. Not all UC time
+    intervals are defined. Only in the Cenozoic and Carboniferous are Epochs defined. Ediacaran
+    is the only preCambrian period, and there are no Archean Eras defined. If a particular unit
+    is defined, all of the longer units are also defined. Attributes corresponding to units in 
+    decreasing significance are eon, era, period, epoch.
+
+    Functions:
+        get_brackets: returns a 2-tuple with the UC bounding dates of the enclosing unit.
+
+        get_unit: returns the name of the enclosing UC unit
+    """
+    # Epoch only defined for Cenozoic and Carboniferous
+    epoch_brackets = [0, 11700, 2.58e6, 5.333e6, 23.03e6, 33.9e6, 56e6, 66e6, 298.9e6, 323.2e6, 358.9e6]
+    epoch_names = ['Holocene', 'Pleistocene', 'Pliocene', 'Miocene', 'Oligocene', 'Eocene', 'Paleocene', None, 'Pennsylvanian', 'Mississippian']
+
+    # Periods not defined earlier than Ediacaran
+    period_brackets = [2.58e6, 23.03e6, 66e6, 145e6, 201.3e6, 251.902e6, 298.9e6, 358.9e6, 419.2e6, 443.8e6, 485.4e6, 541e6, 635e6]
+    period_names = ['Quaternary', 'Neogene' , 'Paleogene' , 'Cretaceous' , 'Jurassic' , 'Triassic' , 'Permian' , 'Carboniferous' , 'Devonian' , 'Silurian' , 'Ordovician' , 'Cambrian' , 'Ediacaran']
+
+    # Eras not defined before Proterozoic
+    era_brackets = [0, 66e6, 251.9e6, 541e6, 1000e6, 1600e6, 2500e6]
+    era_names =['Cenozoic', 'Mesozoic', 'Paleozoic' , 'Neo-proterozoic' , 'Meso-proterozoic' , 'Paleo-proterozoic']
+
+    eon_brackets = [0, 541e6, 2500e6, 4000e6, 4567.3e6]
+    eon_names = ['Phanerozoic', 'Proterozoic', 'Archean', 'Hadean']
+    
+    def __init__(self, age):
+        if age < 0:
+            raise ValueError('Ages must be positive')
+        self.age = age
+
+        def search(brackets, names):
+            for i in range(len(brackets)-1):
+                if (self.age > brackets[i] or brackets[i] == 0) and self.age <= brackets[i+1]:
+                    return brackets[i], brackets[i+1], names[i]
+            return None, None, None
+
+        def set(level, brackets, names):
+            younger, older, name = search(brackets, names)
+            if name is not None:
+                setattr(self, level, name)
+                setattr(self, level+'_brackets', (younger, older))
+
+
+        set('epoch', UCHelper.epoch_brackets, UCHelper.epoch_names)
+        set('period', UCHelper.period_brackets, UCHelper.period_names)
+        set('era', UCHelper.era_brackets, UCHelper.era_names)
+        set('eon', UCHelper.eon_brackets, UCHelper.eon_names)
+
+    def __float__(self):
+        return self.age 
+
+    def __repr__(self):
+        return 'UCHelper({})'.format(self.age)
+
+    def __str__(self):
+        return '{} Ma'.format(self.age/1e6)
+
+    def get_brackets(self, level='period'):
+        """
+        Get a 2-tuple with the lower and upper UC bounding dates of the enclosing unit.
+
+        Args:
+            level: specifies which level of unit to form brackets for. One of "eon", "era", "period" (default) or "epoch".
+
+        Raises:
+            ValueError: if the specified level has not been defined.
+
+        Returns:
+            A 2-tuple with the lower and upper bounds of the UC unit in anum
+        """
+
+        if not hasattr(self, level):
+            raise ValueError('Age must have unit defined to get {}.'.format(level))
+
+        return getattr(self, level+'_brackets')
+
+    def get_unit(self, subdivide = True, level = None):
+        """
+        Get the name of the UC unit represented by this object.
+
+        Args:
+            subdivide: flag which tells the function to interpret relative positions within the unit as "Start", "Early", "Middle", "Late", or "End". Default True
+
+            level: specifies which level of unit to form brackets for. One of "eon", "era", "period" or "epoch". If left as None, then the default is to use the
+            smalled defined unit.
+
+        Returns:
+            2-tuple with name of unit and the name of the unit type
+        """
+
+        if level is not None:
+            reportable = level
+        elif hasattr(self, 'epoch'):
+            reportable = 'epoch'
+        elif hasattr(self, 'period'):
+            reportable = 'period'
+        elif hasattr(self, 'era'):
+            reportable = 'era'
+        else:
+            reportable = 'eon'
+
+        if subdivide:
+            brackets = self.get_brackets(reportable)
+            percentage = (self.age - brackets[0])/(brackets[1] - brackets[0])
+
+            if percentage < 0.05:
+                decorator = 'End '
+            elif percentage <= 0.3:
+                decorator = 'Late '
+            elif percentage <= 0.7:
+                decorator = 'Middle '
+            elif percentage <= 0.95:
+                decorator = 'Early '
+            else:
+                decorator = 'Start '  
+        else:
+            decorator = ''
+
+        return '{}{}'.format(decorator, self.__dict__[reportable]), reportable
+
+
 class RadiometricTransferFunction:
     """
     Classes:
@@ -103,187 +229,6 @@ class RadiometricTransferFunction:
                 return 'Flood day {}'.format(int(1+(self.flood_start_ybp - self.ybp)/day))
             #else:
             #    return ''
-
-    class UCHelper:
-        """
-        UCHelper objects take radiometric dates and finds UC time period information.
-
-        The string representation is the numerical value of the object labeled in Ma. Not all UC time
-        intervals are defined. Only in the Cenozoic and Carboniferous are Epochs defined. Ediacaran
-        is the only preCambrian period, and there are no Archean Eras defined. If a particular unit
-        is defined, all of the longer units are also defined. Attributes corresponding to units in 
-        decreasing significance are eon, era, period, epoch.
-
-        Functions:
-            get_brackets: returns a 2-tuple with the UC bounding dates of the enclosing unit.
-
-            get_unit: returns the name of the enclosing UC unit
-        """
-
-        def __init__(self, age):
-            self.age = age
-
-            if age <= 11700:
-                self.epoch = 'Holocene'
-            elif age <= 2.58e6:
-                self.epoch = 'Pleistocene' 
-            elif age <= 5.333e6:
-                self.epoch = 'Pliocene' 
-            elif age <= 23.03e6:
-                self.epoch = 'Miocene' 
-            elif age <= 33.9e6:
-                self.epoch = 'Oligocene' 
-            elif age <= 56e6:
-                self.epoch = 'Eocene' 
-            elif age <= 66e6:
-                self.epoch = 'Paleocene' 
-            elif age > 298.9e6 and age <= 323.2e6:
-                self.epoch = 'Pennsylvanian'
-            elif age > 298.9e6 and age <= 358.9e6:
-                self.epoch = 'Mississippian'
-
-            if age <= 2.58e6:
-                self.period = 'Quaternary'
-            elif age <= 23.3e6:
-                self.period = 'Neogene' 
-            elif age <= 66e6:
-                self.period = 'Paleogene' 
-            elif age <= 145e6:
-                self.period = 'Cretaceous' 
-            elif age <= 201.6e6:
-                self.period = 'Jurassic' 
-            elif age <= 251.902e6:
-                self.period = 'Triassic' 
-            elif age <= 298.9e6:
-                self.period = 'Permian' 
-            elif age <= 358.9e6:
-                self.period = 'Carboniferous' 
-            elif age <= 419.2e6:
-                self.period = 'Devonian' 
-            elif age <= 443.8e6:
-                self.period = 'Silurian' 
-            elif age <= 485.4e6:
-                self.period = 'Ordovician' 
-            elif age <= 541e6:
-                self.period = 'Cambrian' 
-            elif age <= 635e6:
-                self.period = 'Ediacaran'
-
-            if age <= 66e6:
-                self.era = 'Cenozoic'
-            elif age <= 251.9e6:
-                self.era = 'Mesozoic'
-            elif age <= 541e6:
-                self.era = 'Paleozoic' 
-            elif age <= 1000e6:
-                self.era = 'Neo-proterozoic' 
-            elif age <= 1600e6:
-                self.era = 'Meso-proterozoic' 
-            elif age <= 2500e6:
-                self.era = 'Paleo-proterozoic'
-
-            if age <= 541e6:
-                self.eon = 'Phanerozoic'
-            elif age <= 2500e6:
-                self.eon = 'Proterozoic'
-            elif age <= 3600e6:
-                self.eon = 'Archean'
-            elif age <= 4600e6:
-                self.eon = 'Hadean'
-
-        def __float__(self):
-            return self.age 
-
-        def __repr__(self):
-            return 'UCHelper({})'.format(self.age)
-
-        def __str__(self):
-            return '{} Ma'.format(self.age/1e6)
-
-        def get_brackets(self, level='period'):
-            """
-            Get a 2-tuple with the lower and upper UC bounding dates of the enclosing unit.
-
-            Args:
-                level: specifies which level of unit to form brackets for. One of "eon", "era", "period" (default) or "epoch".
-
-            Raises:
-                ValueError: if the specified level has not been defined.
-
-            Returns:
-                A 2-tuple with the lower and upper bounds of the UC unit in anum
-            """
-
-            if not hasattr(self, level):
-                raise ValueError('Age must be have unit defined to get {}.'.format(level))
-
-            # Epoch only defined for Cenozoic and Carboniferous
-            epoch_brackets = [0, 11700, 2.58e6, 5.333e6, 23.03e6, 33.9e6, 56e6, 66e6, 298.9e6, 323.2e6, 358.9e6]
-
-            # Periods not defined earlier than Ediacaran
-            period_brackets = [2.58e6, 23.3e6, 66e6, 145e6, 201.6e6, 251.902e6, 298.9e6, 358.9e6, 419.2e6, 443.8e6, 485.4e6, 541e6, 635e6]
-
-            # Eras not defined before Proterozoic
-            era_brackets = [0, 66e6, 251.9e6, 541e6, 1000e6, 1600e6, 2500e6]
-
-            eon_brackets = [0, 541e6, 2500e6, 3600e6, 4600e6]
-
-            if level == 'epoch':
-                bracket = epoch_brackets
-            elif level == 'period':
-                bracket = period_brackets
-            elif level == 'era':
-                bracket = era_brackets
-            else:
-                bracket = eon_brackets
-
-            for i in range(len(bracket)-1):
-                if self.age > bracket[i] and self.age <= bracket[i+1]:
-                    return bracket[i], bracket[i+1]
-
-        def get_unit(self, subdivide = True, level = None):
-            """
-            Get the name of the UC unit represented by this object.
-
-            Args:
-                subdivide: flag which tells the function to interpret relative positions within the unit as "Start", "Early", "Middle", "Late", or "End". Default True
-
-                level: specifies which level of unit to form brackets for. One of "eon", "era", "period" or "epoch". If left as None, then the default is to use the
-                smalled defined unit.
-
-            Returns:
-                2-tuple with name of unit and the name of the unit type
-            """
-
-            if level is not None:
-                reportable = level
-            elif hasattr(self, 'epoch'):
-                reportable = 'epoch'
-            elif hasattr(self, 'period'):
-                reportable = 'period'
-            elif hasattr(self, 'era'):
-                reportable = 'era'
-            else:
-                reportable = 'eon'
-
-            if subdivide:
-                brackets = self.get_brackets(reportable)
-                percentage = (self.age - brackets[0])/(brackets[1] - brackets[0])
-
-                if percentage < 0.05:
-                    decorator = 'End '
-                elif percentage <= 0.3:
-                    decorator = 'Late '
-                elif percentage <= 0.7:
-                    decorator = 'Middle '
-                elif percentage <= 0.95:
-                    decorator = 'Early '
-                else:
-                    decorator = 'Start '  
-            else:
-                decorator = ''
-
-            return '{}{}'.format(decorator, self.__dict__[reportable]), reportable
 
     def __init__(self, default_set=True, **kwargs):
         '''
@@ -619,7 +564,7 @@ class RadiometricTransferFunction:
         values1 = [self.family, self.model_class, self.termination, self.laws, self.isotope_system]
         end, start= self.flood_radiometric_range()
         mid, _ = self.erodeozoic_radiometric_range()
-        values2 = [self.UCHelper(start).get_unit()[0], self.UCHelper(end).get_unit()[0]]
+        values2 = [UCHelper(start).get_unit()[0], UCHelper(end).get_unit()[0]]
         values3 = [start, mid, end, start-end, mid-end]
 
         allLabels = lables1 + '\n' + lables2 + lables3
