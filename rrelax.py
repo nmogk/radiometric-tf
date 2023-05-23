@@ -64,6 +64,4 @@ class PrimordialSource(Reservoir):
         self.initial_apparent_age = initial_apparent_age
 
     def get_apparent_age(self, model, time = 0):
-        if self.initial_time == 0:
-            return self.initial_apparent_age
-        return self.initial_apparent_age + model.H(self.initial_time) - model.H(time)
+        return self.initial_apparent_age if self.initial_time == 0 else self.initial_apparent_age + model.H(self.initial_time) - model.H(time)

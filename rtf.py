@@ -8,11 +8,11 @@ class RadiometricTransferFunction:
         UCHelper: Provide uniformitarian chronostratigraphic column names and printing support of radiometric ages
 
     Functions:
-        set_rtf: set the radiometric transfer function
+        set_decay_history (alias: set_rtf): set the decay history function (a.k.a. radiometric transfer function)
 
-        H: radiometric transfer function
+        H: decay history function
 
-        Xi: acceleration factor (derivative of H)
+        acceleration_factor (alias: Xi): acceleration factor (derivative of H)
 
         invert: inverse of H
 
@@ -468,6 +468,8 @@ class RadiometricTransferFunction:
 
             self.__xi__ = lambda x: np.concatenate([func(np.asanyarray(x, dtype=float)[cond]) for cond, func in zip(yield_conditions(x, self.tiepoints), yield_derivative_laws(derivative, self.tiepoints))])
 
+    set_decay_history = set_rtf
+
     def Xi(self, t = None, points = 100):
         """
         Find the acceleration factor (derivative of radiometric transfer function).
@@ -497,6 +499,8 @@ class RadiometricTransferFunction:
         if len(results) < len(tval):
             tval = tval[:-1] # Trim the t if using forward difference and it chopped one off
         return tval, results
+
+    acceleration_factor = Xi
 
     def __forward_difference_xi__(self, t):
         data = self.H(t) # Get the values to perform the difference on
@@ -625,7 +629,7 @@ class RadiometricTransferFunction:
         y = self.H(t)
         t = [self.DateHelper(self, t).__getattribute__(style) for t in t]
         
-        fig, ax_rtf = plt.subplots(num='RTF Flood')
+        fig, ax_rtf = plt.subplots(num='Decay History Flood')
         color1 = 'forestgreen'
         ax_rtf.set_xlabel('time ({})'.format(style.upper()))
         ax_rtf.set_ylabel('measured age (Ma)', color=color1)  
@@ -673,7 +677,7 @@ class RadiometricTransferFunction:
         ax_xi.set_ylim(limitsave)
         
         fig.autofmt_xdate()
-        fig.suptitle('{} Transfer Function'.format(self.name))
+        fig.suptitle('{} Decay History'.format(self.name))
 
         #--------------------------------------------------------------------------------------------------
 
@@ -682,7 +686,7 @@ class RadiometricTransferFunction:
         y = self.H(t)
         t = [self.DateHelper(self, t).__getattribute__(style) for t in t]
         
-        fig2, ax_rtfa = plt.subplots(num='RTF Antediluvian')
+        fig2, ax_rtfa = plt.subplots(num='Decay History Antediluvian')
         ax_rtfa.set_xlabel('time ({})'.format(style.upper()))
         ax_rtfa.set_ylabel('measured age (Ma)', color=color1)  
         ax_rtfa.tick_params(axis='y', labelcolor=color1)
@@ -728,7 +732,7 @@ class RadiometricTransferFunction:
         ax_xia.set_ylim(limitsave)
         
         fig2.autofmt_xdate()
-        fig2.suptitle('{} Transfer Function'.format(self.name))
+        fig2.suptitle('{} Decay History'.format(self.name))
         
         return [ax_rtf, ax_xi, ax_rtfa, ax_xia]
 
@@ -805,7 +809,7 @@ def __commmand_line_interface__():
     parser.add_argument('-i', '--info', default=False, action='store_true', help="Print a table with standard model evaluation information")
     parser.add_argument('-c', '--cal2rad', nargs='*', metavar='DATE_YBP', help='Perform a conversion of the given dates to radiometric ages')
     parser.add_argument('-r','--rad2cal', nargs='*', metavar='RADM_AGE', help='Perform a conversion of the given radiometric ages to dates')
-    parser.add_argument('-s','--rad2special', nargs='*', metavar='RADM_AGE', help='Perform a conversion of the given radiometric ages to dates')
+    parser.add_argument('-s','--rad2special', nargs='*', metavar='RADM_AGE', help='Perform a conversion of the given radiometric ages to dates with rapid events shown in days.')
     parser.add_argument('-x','--accel', nargs='*', metavar='DATE_YBP', help='Get the acceleration factor for the given dates')
     parser.add_argument('-p', '--plot', default=False, action='store_true', help="Generate standard plots of the transfer function and acceleration factor")
     parser.add_argument('-f', '--format', choices=['am', 'bc', 'ybp'], default='ybp', help='Selects the calendar system used for displaying years. Default YBP (2000)')
