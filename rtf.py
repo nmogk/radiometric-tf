@@ -285,16 +285,20 @@ class RadiometricTransferFunction:
 
             return '{}{}'.format(decorator, self.__dict__[reportable]), reportable
 
-    def __init__(self, **kwargs):
+    def __init__(self, default_set=True, **kwargs):
         '''
         Create a RadiometricTransferFunction object
 
         This constructor sets attributes required for the RTF object with defaults that just work, but
         don't provide much extra information in the description fields. Conversions using the RTF object
-        cannot be done after initialization until the set_rtf function is called. All user supplied
-        keywords are added to the object irregardless of their use in this module, so objects can be
+        will be from the uniform model until the decay history has been initialized. Initilization can be
+        done by calling the set_decay_history function or by including 'condition' and 'laws' in the kwargs.
+        The default uniform model setup can be skipped by setting default_set to False. In this case, calling
+        the decay history function will throw an exception until it has been set. If a uniform model is 
+        desired, then calling set_decay_history with no arguments is recommended after construction. All user 
+        supplied keywords are added to the object irregardless of their use in this module, so objects can be
         extended with additional information. Note that tiepoints, max_measured_age, and laws are reset
-        by set_rtf when called.
+        by set_decay_history when called.
 
         Args:
             **name: the name of the model
@@ -329,7 +333,7 @@ class RadiometricTransferFunction:
         # Set default values
         self.name = 'User-defined model'
         self.reference = 'n/a'
-        self.description = 'This is a default model which does not include accelerated nuclear decay. Set a model by calling the set_rtf function.'
+        self.description = 'This is a default model which does not include accelerated nuclear decay. Set a model by calling the set_decay_history function.'
         self.family = 'n/a'
         self.model_class = 'uniform'
         self.termination = 'n/a'
@@ -342,12 +346,23 @@ class RadiometricTransferFunction:
         self.max_measured_age = self.max_ybp
         self.scale_factor = 1.
         self.tiepoints = [0, self.max_ybp]
-        self.H = lambda: (_ for _ in ()).throw(Exception('H: set_rtf must be called before attempting to use a conversion'))
+        self.__H__ = lambda: (_ for _ in ()).throw(Exception('H: set_rtf must be called before attempting to use a conversion'))
         self.__invert__ = self.__binary_search_invert__
         self.__xi__ = self.__forward_difference_xi__
 
         # Hoover up all of the input arguments
         self.__dict__.update(kwargs)
+
+        # If the inputs needed to set the RTF are available in the constructor, then go-ahead and pass them in to set immediately
+        if 'conditions' in kwargs and 'laws' in kwargs:
+            inverse = kwargs.get('inverse') # Returns None if key doesn't exist
+            derivative = kwargs.get('derivative')
+            self.set_rtf(kwargs.get('conditions'), kwargs.get('laws'), inverse, derivative)
+        else:
+            if default_set:
+                self.set_rtf()
+
+            self.is_set = False
 
     def set_rtf(self, conditions = [0], laws = [lambda t:t], inverse = None, derivative = None):
         """
@@ -447,13 +462,13 @@ class RadiometricTransferFunction:
         
         # Update object values related to forward model (inverse must be done after this)
         self.tiepoints = sorted
-        self.H = piecewise(self.tiepoints, laws) 
-        self.max_measured_age = self.H(self.max_ybp)
+        self.__H__ = piecewise(self.tiepoints, laws) 
+        self.max_measured_age = self.__H__(self.max_ybp)
         self.laws = len(laws)
 
         # Inverse and derivative follow the same pattern as the forward model
         if inverse is not None:
-            self.inverse_tiepoints = self.H(self.tiepoints)
+            self.inverse_tiepoints = self.__H__(self.tiepoints)
 
             if len(inverse) != len(laws):
                 raise ValueError('set_rtf: The number of forward ({}) and reverse ({}) laws must be the same.'.format(self.laws, len(inverse)))
@@ -468,7 +483,15 @@ class RadiometricTransferFunction:
 
             self.__xi__ = lambda x: np.concatenate([func(np.asanyarray(x, dtype=float)[cond]) for cond, func in zip(yield_conditions(x, self.tiepoints), yield_derivative_laws(derivative, self.tiepoints))])
 
+        self.is_set = True
+
     set_decay_history = set_rtf
+
+    def H(self, t):
+        '''
+        Find a radiometric age from the given calendar time according to the decay rate set in the decay history function.
+        '''
+        return self.__H__(t)
 
     def Xi(self, t = None, points = 100):
         """
@@ -776,7 +799,7 @@ def init_from_file(filename):
     if not isinstance(indata, dict) or 'tiepoints' not in indata or not isinstance(indata['tiepoints'], list) or 'model' not in indata or not isinstance(indata['model'], list):
         raise TypeError('init_from_file: This is not a recognized file type')
         
-    model = RadiometricTransferFunction(**indata) # Pass all of the JSON attributes to the constructor
+    model = RadiometricTransferFunction(default_set=False, **indata) # Pass all of the JSON attributes to the constructor
 
     if 'imports' in indata and isinstance(indata['imports'], list):
         import importlib
