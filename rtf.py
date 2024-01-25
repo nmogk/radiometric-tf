@@ -20,7 +20,7 @@ class UCHelper:
     epoch_names = ['Holocene', 'Pleistocene', 'Pliocene', 'Miocene', 'Oligocene', 'Eocene', 'Paleocene', None, 'Pennsylvanian', 'Mississippian']
 
     # Periods not defined earlier than Ediacaran
-    period_brackets = [2.58e6, 23.03e6, 66e6, 145e6, 201.3e6, 251.902e6, 298.9e6, 358.9e6, 419.2e6, 443.8e6, 485.4e6, 541e6, 635e6]
+    period_brackets = [0, 2.58e6, 23.03e6, 66e6, 145e6, 201.3e6, 251.902e6, 298.9e6, 358.9e6, 419.2e6, 443.8e6, 485.4e6, 541e6, 635e6]
     period_names = ['Quaternary', 'Neogene' , 'Paleogene' , 'Cretaceous' , 'Jurassic' , 'Triassic' , 'Permian' , 'Carboniferous' , 'Devonian' , 'Silurian' , 'Ordovician' , 'Cambrian' , 'Ediacaran']
 
     # Eras not defined before Proterozoic
